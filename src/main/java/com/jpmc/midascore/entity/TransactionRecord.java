@@ -24,6 +24,8 @@ public class TransactionRecord {
 
     private double amount;
 
+    private double incentive;
+    
     @ManyToOne
     private UserRecord sender;
 
@@ -48,6 +50,14 @@ public class TransactionRecord {
 
     public void setAmount(double amount) {
         this.amount = amount;
+    }
+
+    public double getIncentive(){
+        return incentive;
+    }
+
+    public void setIncentive(double incentive){
+        this.incentive = incentive;
     }
 
     public UserRecord getSender() {

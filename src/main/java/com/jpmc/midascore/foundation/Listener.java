@@ -5,6 +5,7 @@ import com.jpmc.midascore.entity.UserRecord;
 import com.jpmc.midascore.foundation.Transaction;
 import com.jpmc.midascore.repository.TransactionRecordRepository;
 import com.jpmc.midascore.repository.UserRepository;
+import com.jpmc.midascore.service.IncentiveService;
 
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +25,8 @@ public class Listener {
     @Autowired
     private TransactionRecordRepository transactionRecordRepository;
 
+    @Autowired
+    private IncentiveService incentiveService;
 
     private int transactionCount = 0;
 
@@ -40,6 +43,13 @@ public class Listener {
 
         // Step 2: Validate transaction
         if (sender != null && recipient != null && sender.getBalance() >= transaction.getAmount()) {
+
+            //Step 2.5 Get incentive from API
+            Incentive incentive = incentiveService.getIncentive(transaction);
+            float incentiveAmount = incentive.getAmount();
+
+            System.out.println("Incentive amount: " + incentiveAmount);
+
             // Step 3: Adjust balances
             sender.setBalance(sender.getBalance() - transaction.getAmount());
             recipient.setBalance(recipient.getBalance() + transaction.getAmount());
@@ -49,6 +59,7 @@ public class Listener {
             record.setSender(sender);
             record.setRecipient(recipient);
             record.setAmount(transaction.getAmount());
+            record.setIncentive(incentiveAmount);
 
             transactionRecordRepository.save(record);
             userRepository.save(sender);
